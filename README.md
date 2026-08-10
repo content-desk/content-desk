@@ -91,6 +91,10 @@ Environment variables are read from each app's `.env` file (baked into web build
 
 For more details, see the guide on [Deploying with Docker Compose](https://www.better-t-stack.dev/docs/guides/docker).
 
+## License
+
+ContentDesk is source-available and self-hostable under the [ContentDesk License](./LICENSE). The ContentDesk License is a custom license consisting of additional conditions and the complete Apache License 2.0 text; the project is not licensed under standard Apache-2.0 and is not OSI-approved open source.
+
 ## Project Structure
 
 ```
