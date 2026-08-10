@@ -1,0 +1,22 @@
+# Based on the codexpetdb hook baseline.
+# pre-commit: format and lint staged source files.
+# pre-push:   type-check the monorepo.
+# commit-msg: enforce Conventional Commits.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      glob: "**/*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+
+pre-push:
+  jobs:
+    - name: typecheck
+      run: pnpm run check-types
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}

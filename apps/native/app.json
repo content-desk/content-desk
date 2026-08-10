@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "scheme": "content-desk",
+    "userInterfaceStyle": "automatic",
+    "orientation": "default",
+    "web": {
+      "bundler": "metro"
+    },
+    "name": "content-desk",
+    "slug": "content-desk",
+    "plugins": ["expo-font"],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

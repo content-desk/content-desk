@@ -1,0 +1,49 @@
+{
+  "name": "content-desk",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "dev:native": "turbo run dev -F native",
+    "dev:web": "turbo run dev -F web",
+    "dev:server": "turbo run dev -F server",
+    "db:push": "turbo run db:push -F @content-desk/db",
+    "db:studio": "turbo run db:studio -F @content-desk/db",
+    "db:generate": "turbo run db:generate -F @content-desk/db",
+    "db:migrate": "turbo run db:migrate -F @content-desk/db",
+    "db:start": "docker compose up -d postgres",
+    "db:watch": "docker compose up postgres",
+    "db:stop": "docker compose stop postgres",
+    "db:down": "docker compose down postgres",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "prepare": "lefthook install"
+  },
+  "dependencies": {
+    "@content-desk/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.7",
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@content-desk/config": "workspace:*",
+    "@types/node": "^22.20.1",
+    "lefthook": "latest",
+    "turbo": "^2.10.7",
+    "typescript": "^6.0.3",
+    "ultracite": "7.9.4"
+  },
+  "packageManager": "pnpm@10.30.3"
+}

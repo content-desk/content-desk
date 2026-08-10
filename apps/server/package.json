@@ -1,0 +1,34 @@
+{
+  "name": "server",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsdown",
+    "check-types": "tsc -b",
+    "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.mjs"
+  },
+  "dependencies": {
+    "@content-desk/api": "workspace:*",
+    "@content-desk/auth": "workspace:*",
+    "@content-desk/db": "workspace:*",
+    "@content-desk/env": "workspace:*",
+    "@hono/node-server": "^2.0.12",
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/zod": "catalog:",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "evlog": "^2.22.4",
+    "hono": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@content-desk/config": "workspace:*",
+    "@types/node": "^22.20.1",
+    "tsdown": "^0.22.14",
+    "tsx": "^4.23.1",
+    "typescript": "^6.0.3"
+  }
+}
