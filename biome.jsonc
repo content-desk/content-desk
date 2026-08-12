@@ -15,6 +15,9 @@
       "!!**/.expo",
       "!!**/.turbo",
       "!!**/dist",
+      "!!**/out",
+      "!!**/release",
+      "!!**/test-results",
       "!!**/build",
       "!!**/coverage",
       "!!apps/fumadocs/.source"
@@ -64,6 +67,46 @@
           },
           "performance": {
             "noJsxPropsBind": "off"
+          }
+        }
+      }
+    },
+    {
+      // Desktop service classes keep explicit public/private boundaries; React event
+      // handlers are intentionally local in this small bootstrap renderer.
+      "includes": ["apps/desktop/**/*.ts", "apps/desktop/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noJsxPropsBind": "off"
+          },
+          "style": {
+            "noParameterProperties": "off",
+            "useConsistentMemberAccessibility": "off"
+          },
+          "suspicious": {
+            "useAwait": "off"
+          }
+        }
+      }
+    },
+    {
+      // PATH discovery is deliberately sequential to preserve deterministic order.
+      "includes": ["apps/desktop/src/main/runtimes/runtime-service.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noAwaitInLoops": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/desktop/src/renderer/App.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
           }
         }
       }

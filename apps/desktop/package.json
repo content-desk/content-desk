@@ -1,0 +1,74 @@
+{
+  "name": "@content-desk/desktop",
+  "version": "0.1.0",
+  "description": "Local-first AI creation workspace desktop bootstrap",
+  "private": true,
+  "type": "module",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "check-types": "tsc --noEmit",
+    "check": "ultracite check src tests package.json tsconfig.json *.config.ts",
+    "test": "vitest run --exclude tests/e2e/**",
+    "test:e2e": "pnpm run build && playwright test",
+    "package": "pnpm run build && electron-builder --mac --dir"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "4.0.37",
+    "@ai-sdk/openai-compatible": "3.0.29",
+    "ai": "7.0.59",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@content-desk/config": "workspace:*",
+    "@playwright/test": "1.62.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.3",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^5.1.4",
+    "electron": "43.3.0",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "jsdom": "30.0.1",
+    "typescript": "^6.0.3",
+    "ultracite": "7.9.4",
+    "vite": "7.3.1",
+    "vitest": "4.1.10"
+  },
+  "build": {
+    "appId": "com.contentdesk.desktop",
+    "productName": "ContentDesk",
+    "asar": true,
+    "npmRebuild": false,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../../LICENSE",
+        "to": "LICENSE"
+      },
+      {
+        "from": "../../NOTICE",
+        "to": "NOTICE"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dir"
+      ]
+    }
+  }
+}
