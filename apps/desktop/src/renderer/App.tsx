@@ -77,7 +77,7 @@ export function App() {
           await window.contentDesk.conversations.get(conversationId)
         );
       } catch (reason) {
-        setError(reason instanceof Error ? reason.message : "刷新失败。");
+        setError(describeError(reason, "刷新失败。"));
         return;
       }
       setActive((current) =>
@@ -88,7 +88,7 @@ export function App() {
           unwrapIpcResult(await window.contentDesk.conversations.list())
         );
       } catch (reason) {
-        setError(reason instanceof Error ? reason.message : "刷新失败。");
+        setError(describeError(reason, "刷新失败。"));
       }
     },
     [setError]
@@ -96,12 +96,12 @@ export function App() {
 
   useEffect(() => {
     reload().catch((reason: unknown) =>
-      setError(reason instanceof Error ? reason.message : "加载失败。")
+      setError(describeError(reason, "加载失败。"))
     );
   }, [reload, setError]);
   useEffect(
     () =>
-      window.contentDesk.chat.onEvent((event) => {
+      window.contentDesk.chat.onEvent(async (event) => {
         const currentRun = runRef.current;
         if (event.runId !== currentRun?.id) {
           return;
@@ -113,18 +113,13 @@ export function App() {
           setError(event.message);
           runRef.current = null;
           setRunId(null);
-          refreshConversation(currentRun.conversationId).catch(() =>
-            setError(event.message)
-          );
+          await refreshConversation(currentRun.conversationId);
         }
         if (event.type === "done" || event.type === "stopped") {
           runRef.current = null;
           setRunId(null);
           setStreamed("");
-          refreshConversation(currentRun.conversationId).catch(
-            (reason: unknown) =>
-              setError(reason instanceof Error ? reason.message : "刷新失败。")
-          );
+          await refreshConversation(currentRun.conversationId);
         }
       }),
     [refreshConversation, setError]
@@ -341,4 +336,8 @@ export function App() {
       </main>
     </div>
   );
+}
+
+function describeError(reason: unknown, fallback: string): string {
+  return reason instanceof Error ? reason.message : fallback;
 }
