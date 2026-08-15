@@ -13,6 +13,13 @@ export const supportedProviderKinds = [
   "openai-compatible",
   "anthropic-compatible",
 ] as const satisfies readonly ProviderKind[];
+export type SupportedProviderKind = (typeof supportedProviderKinds)[number];
+
+export function isSupportedProviderKind(
+  kind: ProviderKind
+): kind is SupportedProviderKind {
+  return supportedProviderKinds.some((supportedKind) => supportedKind === kind);
+}
 
 const providerBaseUrlSchema = z
   .string()
@@ -72,7 +79,6 @@ export const runtimeProfileSchema = z.object({
   lastProbedAt: z.string().nullable(),
   name: z.string(),
   version: z.string().nullable(),
-  workingDirectory: z.string().nullable(),
 });
 export type RuntimeProfile = z.infer<typeof runtimeProfileSchema>;
 
@@ -161,7 +167,6 @@ export const channels = {
   providersSave: "providers:save",
   providersTest: "providers:test",
   runtimesChooseExecutable: "runtimes:choose-executable",
-  runtimesChooseWorkingDirectory: "runtimes:choose-working-directory",
   runtimesList: "runtimes:list",
   runtimesProbe: "runtimes:probe",
 } as const;
@@ -196,9 +201,6 @@ export interface DesktopApi {
     probe: (kind: RuntimeKind) => Promise<IpcResult<RuntimeProfile>>;
     chooseExecutable: (
       kind: Exclude<RuntimeKind, "contentdesk-native">
-    ) => Promise<IpcResult<RuntimeProfile | null>>;
-    chooseWorkingDirectory: (
-      kind: RuntimeKind
     ) => Promise<IpcResult<RuntimeProfile | null>>;
   };
 }

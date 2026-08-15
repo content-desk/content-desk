@@ -1,3 +1,14 @@
+import { type ChatService, safeError } from "@desktop/main/chat-service";
+import type { Repositories } from "@desktop/main/database/repositories";
+import type { ProviderService } from "@desktop/main/providers/provider-service";
+import type { RuntimeService } from "@desktop/main/runtimes/runtime-service";
+import {
+  channels,
+  chatStartSchema,
+  type IpcResult,
+  providerInputSchema,
+  runtimeKindSchema,
+} from "@desktop/shared/contracts";
 import {
   BrowserWindow,
   dialog,
@@ -6,18 +17,6 @@ import {
   shell,
 } from "electron";
 import { z } from "zod";
-import {
-  channels,
-  chatStartSchema,
-  type IpcResult,
-  providerInputSchema,
-  runtimeKindSchema,
-} from "../../shared/contracts";
-import type { ChatService } from "../chat-service";
-import { safeError } from "../chat-service";
-import type { Repositories } from "../database/repositories";
-import type { ProviderService } from "../providers/provider-service";
-import type { RuntimeService } from "../runtimes/runtime-service";
 
 interface Services {
   chat: ChatService;
@@ -29,7 +28,11 @@ interface Services {
 export function registerIpc(services: Services): void {
   const handle = <T>(
     channel: string,
-    action: (event: IpcMainInvokeEvent, input: unknown) => Promise<T> | T
+    action: (
+      event: IpcMainInvokeEvent,
+      input: unknown,
+      owner: BrowserWindow
+    ) => Promise<T> | T
   ) => {
     ipcMain.handle(channel, async (event, input): Promise<IpcResult<T>> => {
       const owner = BrowserWindow.fromWebContents(event.sender);
@@ -37,7 +40,7 @@ export function registerIpc(services: Services): void {
         return failure("FORBIDDEN", "Invalid IPC sender.");
       }
       try {
-        return { data: await action(event, input), ok: true };
+        return { data: await action(event, input, owner), ok: true };
       } catch (error) {
         return failure(
           error instanceof z.ZodError ? "INVALID_INPUT" : "OPERATION_FAILED",
@@ -63,12 +66,8 @@ export function registerIpc(services: Services): void {
   handle(channels.runtimesProbe, (_event, input) =>
     services.runtimes.probe(runtimeKindSchema.parse(input))
   );
-  handle(channels.runtimesChooseExecutable, async (_event, input) => {
+  handle(channels.runtimesChooseExecutable, async (_event, input, owner) => {
     const kind = runtimeKindSchema.exclude(["contentdesk-native"]).parse(input);
-    const owner = BrowserWindow.fromWebContents(_event.sender);
-    if (!owner) {
-      throw new Error("Invalid IPC sender.");
-    }
     const result = await dialog.showOpenDialog(owner, {
       properties: ["openFile"],
       title: `选择 ${kind} 可执行文件`,
@@ -78,22 +77,6 @@ export function registerIpc(services: Services): void {
       ? null
       : services.runtimes.setExecutable(kind, path);
   });
-  handle(channels.runtimesChooseWorkingDirectory, async (_event, input) => {
-    const kind = runtimeKindSchema.parse(input);
-    const owner = BrowserWindow.fromWebContents(_event.sender);
-    if (!owner) {
-      throw new Error("Invalid IPC sender.");
-    }
-    const result = await dialog.showOpenDialog(owner, {
-      properties: ["openDirectory"],
-      title: "选择工作目录",
-    });
-    const [path] = result.filePaths;
-    return result.canceled || !path
-      ? null
-      : services.runtimes.setWorkingDirectory(kind, path);
-  });
-
   handle(channels.conversationsList, () =>
     services.repositories.listConversations()
   );

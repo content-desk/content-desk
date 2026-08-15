@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
 import {
   chatStartSchema,
+  isSupportedProviderKind,
   providerInputSchema,
-} from "../../src/shared/contracts";
+  providerKindSchema,
+} from "@desktop/shared/contracts";
+import { describe, expect, it } from "vitest";
 
 describe("IPC contracts", () => {
   it("rejects malformed providers and chat runtimes", () => {
@@ -56,5 +58,20 @@ describe("IPC contracts", () => {
       name: "Provider",
     });
     expect(parsed.clearHeaders).toBe(true);
+  });
+
+  it("defines one support matrix for every Provider kind", () => {
+    expect(
+      providerKindSchema.options.map((kind) => [
+        kind,
+        isSupportedProviderKind(kind),
+      ])
+    ).toEqual([
+      ["openai-compatible", true],
+      ["anthropic-compatible", true],
+      ["azure-openai", false],
+      ["vertex-ai", false],
+      ["amazon-bedrock", false],
+    ]);
   });
 });

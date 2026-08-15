@@ -1,9 +1,9 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { openDatabase } from "@desktop/main/database/database";
+import { Repositories } from "@desktop/main/database/repositories";
 import { describe, expect, it } from "vitest";
-import { openDatabase } from "../../src/main/database/database";
-import { Repositories } from "../../src/main/database/repositories";
 
 describe("desktop database", () => {
   it("migrates, seeds runtimes, and persists conversations", () => {
@@ -14,6 +14,19 @@ describe("desktop database", () => {
       "codex",
       "claude-code",
     ]);
+    expect(database.prepare("PRAGMA user_version").get()).toEqual({
+      user_version: 1,
+    });
+    expect(database.prepare("SELECT version FROM _migrations").all()).toEqual([
+      { version: 1 },
+    ]);
+    expect(
+      database.prepare("PRAGMA table_info(runtime_profiles)").all()
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "working_directory" }),
+      ])
+    );
     const conversation = repositories.createConversation();
     repositories.addMessage(
       conversation.id,
@@ -58,6 +71,9 @@ describe("desktop database", () => {
     expect(
       new Repositories(reopened).getConversation(conversation.id)?.id
     ).toBe(conversation.id);
+    expect(reopened.prepare("SELECT version FROM _migrations").all()).toEqual([
+      { version: 1 },
+    ]);
     reopened.close();
     await rm(root, { force: true, recursive: true });
   });

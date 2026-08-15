@@ -1,10 +1,10 @@
 import { chmod, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { openDatabase } from "@desktop/main/database/database";
+import { Repositories } from "@desktop/main/database/repositories";
+import { RuntimeService } from "@desktop/main/runtimes/runtime-service";
 import { describe, expect, it } from "vitest";
-import { openDatabase } from "../../src/main/database/database";
-import { Repositories } from "../../src/main/database/repositories";
-import { RuntimeService } from "../../src/main/runtimes/runtime-service";
 
 describe("RuntimeService", () => {
   it.skipIf(process.platform === "win32")(

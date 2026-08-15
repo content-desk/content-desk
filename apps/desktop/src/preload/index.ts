@@ -1,9 +1,9 @@
-import { contextBridge, ipcRenderer } from "electron";
 import {
   channels,
   chatEventSchema,
   type DesktopApi,
-} from "../shared/contracts";
+} from "@desktop/shared/contracts";
+import { contextBridge, ipcRenderer } from "electron";
 
 const invoke = <T>(channel: string, input?: unknown): Promise<T> =>
   ipcRenderer.invoke(channel, input);
@@ -39,8 +39,6 @@ const api: DesktopApi = {
   },
   runtimes: {
     chooseExecutable: (kind) => invoke(channels.runtimesChooseExecutable, kind),
-    chooseWorkingDirectory: (kind) =>
-      invoke(channels.runtimesChooseWorkingDirectory, kind),
     list: () => invoke(channels.runtimesList),
     probe: (kind) => invoke(channels.runtimesProbe, kind),
   },

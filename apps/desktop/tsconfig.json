@@ -3,8 +3,11 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "types": ["node", "vite/client"],
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@desktop/*": ["./src/*"]
+    },
+    "types": ["node", "vite/client"]
   },
   "include": [
     "src",

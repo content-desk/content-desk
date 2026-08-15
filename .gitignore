@@ -58,5 +58,6 @@ apps/desktop/release
 # Misc
 *.tgz
 .cache
+.scratch/
 tmp
 temp

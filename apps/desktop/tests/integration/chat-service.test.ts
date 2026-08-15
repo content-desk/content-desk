@@ -1,11 +1,11 @@
 import { EventEmitter } from "node:events";
+import { ChatService } from "@desktop/main/chat-service";
+import { openDatabase } from "@desktop/main/database/database";
+import { Repositories } from "@desktop/main/database/repositories";
+import type { ChatEvent } from "@desktop/shared/contracts";
 import type { ModelMessage } from "ai";
 import type { WebContents } from "electron";
 import { describe, expect, it } from "vitest";
-import { ChatService } from "../../src/main/chat-service";
-import { openDatabase } from "../../src/main/database/database";
-import { Repositories } from "../../src/main/database/repositories";
-import type { ChatEvent } from "../../src/shared/contracts";
 
 describe("ChatService", () => {
   it("persists partial output when the owner stops a stream", async () => {

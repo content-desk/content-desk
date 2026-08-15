@@ -1,8 +1,8 @@
 # Issue tracker：本地 markdown
 
-本仓库的 issue 与 spec 以 markdown 文件形式存放在 `.scratch/` 下，**随代码进版本库**。
+本仓库的 issue 与 spec 以 markdown 文件形式存放在 `.scratch/` 下。该目录被 Git 忽略，仅作为本地工程记录。
 
-不要把 secret、token、密钥写进 `.scratch/` —— 它会被提交。
+不要把 secret、token、密钥写进 `.scratch/`。Git 忽略不等于安全存储。
 
 ## 约定
 

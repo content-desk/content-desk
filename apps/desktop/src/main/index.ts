@@ -1,12 +1,15 @@
 import { join } from "node:path";
-import { app, BrowserWindow, safeStorage, session } from "electron";
-import { ChatService } from "./chat-service";
-import { openDatabase } from "./database/database";
-import { Repositories } from "./database/repositories";
-import { registerIpc } from "./ipc/register-ipc";
-import { ProviderService } from "./providers/provider-service";
-import { RuntimeService } from "./runtimes/runtime-service";
-import { ElectronSecretCrypto, SecretStore } from "./secrets/secret-store";
+import { ChatService } from "@desktop/main/chat-service";
+import { openDatabase } from "@desktop/main/database/database";
+import { Repositories } from "@desktop/main/database/repositories";
+import { registerIpc } from "@desktop/main/ipc/register-ipc";
+import { ProviderService } from "@desktop/main/providers/provider-service";
+import { RuntimeService } from "@desktop/main/runtimes/runtime-service";
+import {
+  ElectronSecretCrypto,
+  SecretStore,
+} from "@desktop/main/secrets/secret-store";
+import { app, BrowserWindow, dialog, safeStorage, session } from "electron";
 
 function createWindow(): BrowserWindow {
   const window = new BrowserWindow({
@@ -38,9 +41,21 @@ app.whenReady().then(() => {
     (_contents, _permission, callback) => callback(false)
   );
   session.defaultSession.setPermissionCheckHandler(() => false);
-  const database = openDatabase(
-    join(app.getPath("userData"), "contentdesk.sqlite")
-  );
+  let database: ReturnType<typeof openDatabase>;
+  try {
+    database = openDatabase(
+      join(app.getPath("userData"), "contentdesk.sqlite")
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown database error.";
+    dialog.showErrorBox(
+      "ContentDesk 无法启动",
+      `数据库初始化失败。原数据库未被删除。\n\n${message}`
+    );
+    app.quit();
+    return;
+  }
   const repositories = new Repositories(database);
   const secrets = new SecretStore(
     app.getPath("userData"),

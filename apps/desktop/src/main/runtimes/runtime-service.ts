@@ -2,8 +2,8 @@ import { spawn } from "node:child_process";
 import { constants } from "node:fs";
 import { access, realpath, stat } from "node:fs/promises";
 import { delimiter, isAbsolute, join } from "node:path";
-import type { RuntimeKind, RuntimeProfile } from "../../shared/contracts";
-import type { Repositories } from "../database/repositories";
+import type { Repositories } from "@desktop/main/database/repositories";
+import type { RuntimeKind, RuntimeProfile } from "@desktop/shared/contracts";
 
 const executableNames: Record<
   Exclude<RuntimeKind, "contentdesk-native">,
@@ -30,19 +30,6 @@ export class RuntimeService {
       executablePath: await realpath(path),
     });
     return this.probe(kind);
-  }
-
-  public async setWorkingDirectory(
-    kind: RuntimeKind,
-    path: string
-  ): Promise<RuntimeProfile> {
-    const resolved = await realpath(path);
-    if (!(await stat(resolved)).isDirectory()) {
-      throw new Error("Working directory must be a directory.");
-    }
-    return this.repositories.updateRuntime(kind, {
-      workingDirectory: resolved,
-    });
   }
 
   public async probe(kind: RuntimeKind): Promise<RuntimeProfile> {

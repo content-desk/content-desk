@@ -1,11 +1,11 @@
-import type { ModelMessage } from "ai";
-import type { WebContents } from "electron";
+import type { Repositories } from "@desktop/main/database/repositories";
 import {
   type ChatEvent,
   type ChatStartInput,
   channels,
-} from "../shared/contracts";
-import type { Repositories } from "./database/repositories";
+} from "@desktop/shared/contracts";
+import type { ModelMessage } from "ai";
+import type { WebContents } from "electron";
 
 interface ActiveRun {
   controller: AbortController;

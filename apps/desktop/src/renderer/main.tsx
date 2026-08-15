@@ -1,7 +1,7 @@
+import { App } from "@desktop/renderer/App";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { App } from "./App";
-import "./styles.css";
+import "@desktop/renderer/styles.css";
 
 const root = document.getElementById("root");
 if (!root) {

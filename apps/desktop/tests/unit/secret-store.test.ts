@@ -1,11 +1,11 @@
 import { mkdtemp, readFile, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
 import {
   type SecretCrypto,
   SecretStore,
-} from "../../src/main/secrets/secret-store";
+} from "@desktop/main/secrets/secret-store";
+import { describe, expect, it } from "vitest";
 
 class TestCrypto implements SecretCrypto {
   public async available() {

@@ -1,18 +1,22 @@
 import { randomUUID } from "node:crypto";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import type { Repositories } from "@desktop/main/database/repositories";
+import type {
+  ProviderSecrets,
+  SecretRepository,
+} from "@desktop/main/secrets/secret-store";
+import {
+  isSupportedProviderKind,
+  type ProviderInput,
+  type ProviderView,
+} from "@desktop/shared/contracts";
 import {
   generateText,
   type LanguageModel,
   type ModelMessage,
   streamText,
 } from "ai";
-import type { ProviderInput, ProviderView } from "../../shared/contracts";
-import type { Repositories } from "../database/repositories";
-import type {
-  ProviderSecrets,
-  SecretRepository,
-} from "../secrets/secret-store";
 
 export class UnsupportedProviderError extends Error {}
 export class ProviderRequestError extends Error {}
@@ -141,6 +145,11 @@ export class ProviderService {
     if (!provider) {
       throw new Error("Provider not found.");
     }
+    if (!isSupportedProviderKind(provider.kind)) {
+      throw new UnsupportedProviderError(
+        `${provider.kind} is defined for future support but is not available in v0.1.`
+      );
+    }
     if (!provider.secret_ref) {
       throw new Error("Provider credentials are not configured.");
     }
@@ -163,8 +172,9 @@ export class ProviderService {
       });
       return { model: factory(modelName) };
     }
+    const unsupportedKind: never = provider.kind;
     throw new UnsupportedProviderError(
-      `${provider.kind} is defined for future support but is not available in v0.1.`
+      `No model factory is registered for ${unsupportedKind}.`
     );
   }
 }

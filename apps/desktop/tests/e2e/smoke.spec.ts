@@ -3,8 +3,8 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { DesktopApi } from "@desktop/shared/contracts";
 import { _electron as electron, expect, test } from "@playwright/test";
-import type { DesktopApi } from "../../src/shared/contracts";
 
 const httpsRequired = /Base URL must use HTTPS/;
 

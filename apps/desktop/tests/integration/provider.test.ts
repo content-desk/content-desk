@@ -1,10 +1,17 @@
 import { once } from "node:events";
 import { createServer, type RequestListener } from "node:http";
+import { openDatabase } from "@desktop/main/database/database";
+import { Repositories } from "@desktop/main/database/repositories";
+import {
+  ProviderService,
+  UnsupportedProviderError,
+} from "@desktop/main/providers/provider-service";
+import type { ProviderSecrets } from "@desktop/main/secrets/secret-store";
+import {
+  isSupportedProviderKind,
+  providerKindSchema,
+} from "@desktop/shared/contracts";
 import { describe, expect, it } from "vitest";
-import { openDatabase } from "../../src/main/database/database";
-import { Repositories } from "../../src/main/database/repositories";
-import { ProviderService } from "../../src/main/providers/provider-service";
-import type { ProviderSecrets } from "../../src/main/secrets/secret-store";
 
 describe("OpenAI-compatible provider", () => {
   it("streams from a local mock server without cloud credentials", async () => {
@@ -148,6 +155,51 @@ describe("OpenAI-compatible provider", () => {
     } finally {
       fixture.close();
     }
+  });
+});
+
+describe("Provider support boundary", () => {
+  it("keeps Repository status and model factory gates aligned", async () => {
+    const database = openDatabase(":memory:");
+    const repositories = new Repositories(database);
+    const memory = new Map<string, ProviderSecrets>();
+    const service = new ProviderService(repositories, {
+      delete: async () => undefined,
+      read: async (reference) => requireSecret(memory, reference),
+      write: async (reference, value) => {
+        memory.set(reference, value);
+      },
+    });
+
+    const providers = await Promise.all(
+      providerKindSchema.options.map((kind) =>
+        service.save({
+          apiKey: "test-only",
+          baseUrl: "http://127.0.0.1:9/v1",
+          headers: {},
+          kind,
+          model: "mock",
+          name: kind,
+        })
+      )
+    );
+    await Promise.all(
+      providers.map(async (provider) => {
+        expect(provider.supported).toBe(isSupportedProviderKind(provider.kind));
+        const model = service.stream(
+          provider.id,
+          "mock",
+          [{ content: "Hi", role: "user" }],
+          new AbortController().signal
+        );
+        if (isSupportedProviderKind(provider.kind)) {
+          await expect(model).resolves.toBeDefined();
+        } else {
+          await expect(model).rejects.toBeInstanceOf(UnsupportedProviderError);
+        }
+      })
+    );
+    database.close();
   });
 });
 

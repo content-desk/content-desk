@@ -1,5 +1,14 @@
 // @vitest-environment jsdom
 
+import { App } from "@desktop/renderer/App";
+import type {
+  ChatEvent,
+  ConversationDetail,
+  DesktopApi,
+  IpcResult,
+  ProviderView,
+  RuntimeProfile,
+} from "@desktop/shared/contracts";
 import {
   act,
   cleanup,
@@ -10,20 +19,12 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { App } from "../../src/renderer/App";
-import type {
-  ChatEvent,
-  ConversationDetail,
-  DesktopApi,
-  IpcResult,
-  ProviderView,
-  RuntimeProfile,
-} from "../../src/shared/contracts";
 
 const providerId = "10000000-0000-4000-8000-000000000001";
 const conversationAId = "20000000-0000-4000-8000-000000000001";
 const conversationBId = "20000000-0000-4000-8000-000000000002";
 const now = "2026-08-11T00:00:00.000Z";
+const mockProviderName = /Mock Provider/;
 
 afterEach(() => {
   cleanup();
@@ -117,24 +118,68 @@ describe("Desktop renderer", () => {
     expect(screen.queryByText("A completed")).toBeNull();
   });
 
+  it("shows Conversation failures in the Chat interface", async () => {
+    const state = createDesktopMock();
+    state.api.conversations.get = vi.fn(async () => failure("对话加载失败。"));
+    installDesktopApi(state.api);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Conversation A" })
+    );
+
+    expect(await screen.findByText("对话加载失败。")).toBeTruthy();
+  });
+
+  it("shows Chat start failures and rolls back the active run", async () => {
+    const state = createDesktopMock();
+    state.api.chat.start = vi.fn(async () => failure("对话运行失败。"));
+    installDesktopApi(state.api);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "Conversation A" })
+    );
+    await user.type(screen.getByPlaceholderText("输入消息…"), "hello");
+    await user.click(screen.getByRole("button", { name: "发送" }));
+
+    expect(await screen.findByText("对话运行失败。")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "停止" })).toBeNull();
+  });
+
+  it("shows Provider failures in Settings", async () => {
+    const state = createDesktopMock();
+    state.api.providers.save = vi.fn(async () =>
+      failure("Provider 保存失败。")
+    );
+    installDesktopApi(state.api);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole("button", { name: "设置" }));
+    await user.click(screen.getByRole("button", { name: mockProviderName }));
+    await user.click(screen.getByRole("button", { name: "保存" }));
+
+    expect(await screen.findByText("Provider 保存失败。")).toBeTruthy();
+  });
+
   it.each([
     ["探测", "probe"],
     ["选择程序", "chooseExecutable"],
-    ["选择工作目录", "chooseWorkingDirectory"],
   ] as const)(
     "shows Runtime %s failures in Settings",
     async (label, method) => {
       const state = createDesktopMock();
-      const failure = async () => ({
+      const runtimeFailure = async () => ({
         error: { code: "RUNTIME_TEST", message: `${label}失败。` },
         ok: false as const,
       });
       if (method === "probe") {
-        state.api.runtimes.probe = vi.fn(failure);
-      } else if (method === "chooseExecutable") {
-        state.api.runtimes.chooseExecutable = vi.fn(failure);
+        state.api.runtimes.probe = vi.fn(runtimeFailure);
       } else {
-        state.api.runtimes.chooseWorkingDirectory = vi.fn(failure);
+        state.api.runtimes.chooseExecutable = vi.fn(runtimeFailure);
       }
       installDesktopApi(state.api);
       const user = userEvent.setup();
@@ -149,6 +194,7 @@ describe("Desktop renderer", () => {
       );
 
       expect(await screen.findByText(`${label}失败。`)).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "选择工作目录" })).toBeNull();
     }
   );
 });
@@ -206,7 +252,6 @@ function createDesktopMock() {
     },
     runtimes: {
       chooseExecutable: vi.fn(async () => ok(runtimes[1] ?? null)),
-      chooseWorkingDirectory: vi.fn(async () => ok(runtimes[1] ?? null)),
       list: vi.fn(async () => ok(runtimes)),
       probe: vi.fn(async () => ok(codexRuntime)),
     },
@@ -238,6 +283,13 @@ function requiredDetail(
 
 function ok<T>(data: T): IpcResult<T> {
   return { data, ok: true };
+}
+
+function failure(errorMessage: string): IpcResult<never> {
+  return {
+    error: { code: "TEST_FAILURE", message: errorMessage },
+    ok: false,
+  };
 }
 
 function conversation(title: string, id: string): ConversationDetail {
@@ -280,6 +332,5 @@ function runtime(kind: RuntimeProfile["kind"], name: string): RuntimeProfile {
     lastProbedAt: null,
     name,
     version: null,
-    workingDirectory: null,
   };
 }

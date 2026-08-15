@@ -1,15 +1,16 @@
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import type {
-  ChatMessage,
-  Conversation,
-  ConversationDetail,
-  ProviderInput,
-  ProviderKind,
-  ProviderView,
-  RuntimeKind,
-  RuntimeProfile,
-} from "../../shared/contracts";
+import {
+  type ChatMessage,
+  type Conversation,
+  type ConversationDetail,
+  isSupportedProviderKind,
+  type ProviderInput,
+  type ProviderKind,
+  type ProviderView,
+  type RuntimeKind,
+  type RuntimeProfile,
+} from "@desktop/shared/contracts";
 
 interface ProviderRow {
   api_key_configured: number;
@@ -50,13 +51,7 @@ interface RuntimeRow {
   last_probed_at: string | null;
   name: string;
   version: string | null;
-  working_directory: string | null;
 }
-
-const supported = new Set<ProviderKind>([
-  "openai-compatible",
-  "anthropic-compatible",
-]);
 
 export class Repositories {
   public constructor(private readonly db: DatabaseSync) {}
@@ -235,7 +230,6 @@ export class Repositories {
       Pick<
         RuntimeProfile,
         | "executablePath"
-        | "workingDirectory"
         | "available"
         | "version"
         | "lastError"
@@ -246,11 +240,10 @@ export class Repositories {
     const current = this.getRuntime(kind);
     const next = { ...current, ...update };
     this.db
-      .prepare(`UPDATE runtime_profiles SET executable_path=?, working_directory=?,
-      available=?, version=?, last_error=?, last_probed_at=? WHERE kind=?`)
+      .prepare(`UPDATE runtime_profiles SET executable_path=?, available=?,
+      version=?, last_error=?, last_probed_at=? WHERE kind=?`)
       .run(
         next.executablePath,
-        next.workingDirectory,
         next.available ? 1 : 0,
         next.version,
         next.lastError,
@@ -276,7 +269,7 @@ export class Repositories {
       kind: row.kind,
       model: row.model,
       name: row.name,
-      supported: supported.has(row.kind),
+      supported: isSupportedProviderKind(row.kind),
       updatedAt: row.updated_at,
     };
   }
@@ -313,5 +306,4 @@ const mapRuntime = (row: RuntimeRow): RuntimeProfile => ({
   lastProbedAt: row.last_probed_at,
   name: row.name,
   version: row.version,
-  workingDirectory: row.working_directory,
 });

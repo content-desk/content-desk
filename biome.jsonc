@@ -81,11 +81,123 @@
             "noJsxPropsBind": "off"
           },
           "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["./**", "../**"],
+                    "message": "Desktop modules must use the @desktop/* alias."
+                  }
+                ]
+              }
+            },
             "noParameterProperties": "off",
             "useConsistentMemberAccessibility": "off"
           },
           "suspicious": {
             "useAwait": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/desktop/src/main/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "./**",
+                      "../**",
+                      "@desktop/preload/**",
+                      "@desktop/renderer/**"
+                    ],
+                    "message": "Main may import only Main and Shared Desktop modules."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/desktop/src/preload/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "./**",
+                      "../**",
+                      "@desktop/main/**",
+                      "@desktop/renderer/**"
+                    ],
+                    "message": "Preload may import only Preload and Shared Desktop modules."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/desktop/src/renderer/**/*.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "./**",
+                      "../**",
+                      "@desktop/main/**",
+                      "@desktop/preload/**"
+                    ],
+                    "message": "Renderer may import only Renderer and Shared Desktop modules."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/desktop/src/shared/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "./**",
+                      "../**",
+                      "@desktop/main/**",
+                      "@desktop/preload/**",
+                      "@desktop/renderer/**"
+                    ],
+                    "message": "Shared Desktop modules cannot import runtime layers."
+                  }
+                ]
+              }
+            }
           }
         }
       }
