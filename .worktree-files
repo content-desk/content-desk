@@ -1,0 +1,5 @@
+# Local files copied from the primary worktree into secondary worktrees.
+.claude/settings.local.json
+apps/native/.env
+apps/server/.env
+apps/web/.env
