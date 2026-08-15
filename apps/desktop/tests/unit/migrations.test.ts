@@ -198,6 +198,6 @@ describe("database migrator", () => {
   });
 });
 
-async function createTemporaryDirectory(): Promise<string> {
+function createTemporaryDirectory(): Promise<string> {
   return mkdtemp(join(tmpdir(), "contentdesk-migration-"));
 }

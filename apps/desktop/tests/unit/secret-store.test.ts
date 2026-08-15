@@ -8,17 +8,19 @@ import {
 import { describe, expect, it } from "vitest";
 
 class TestCrypto implements SecretCrypto {
-  public async available() {
-    return true;
+  public available() {
+    return Promise.resolve(true);
   }
-  public async encrypt(value: string) {
-    return Buffer.from(Buffer.from(value).toString("base64"), "utf8");
+  public encrypt(value: string) {
+    return Promise.resolve(
+      Buffer.from(Buffer.from(value).toString("base64"), "utf8")
+    );
   }
-  public async decrypt(value: Buffer) {
-    return {
+  public decrypt(value: Buffer) {
+    return Promise.resolve({
       plaintext: Buffer.from(value.toString("utf8"), "base64").toString("utf8"),
       shouldReEncrypt: false,
-    };
+    });
   }
 }
 
@@ -41,9 +43,9 @@ describe("SecretStore", () => {
 
   it("fails closed when platform encryption is unavailable", async () => {
     const crypto: SecretCrypto = {
-      available: async () => false,
-      decrypt: async () => ({ plaintext: "", shouldReEncrypt: false }),
-      encrypt: async () => Buffer.alloc(0),
+      available: () => Promise.resolve(false),
+      decrypt: () => Promise.resolve({ plaintext: "", shouldReEncrypt: false }),
+      encrypt: () => Promise.resolve(Buffer.alloc(0)),
     };
     const store = new SecretStore(tmpdir(), crypto);
     await expect(store.write("provider-2", { headers: {} })).rejects.toThrow(

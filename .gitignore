@@ -58,6 +58,7 @@ apps/desktop/release
 # Misc
 *.tgz
 .cache
+.claude/worktrees/
 .scratch/
 tmp
 temp

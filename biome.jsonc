@@ -94,9 +94,6 @@
             },
             "noParameterProperties": "off",
             "useConsistentMemberAccessibility": "off"
-          },
-          "suspicious": {
-            "useAwait": "off"
           }
         }
       }

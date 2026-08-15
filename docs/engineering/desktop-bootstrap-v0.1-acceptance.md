@@ -3,9 +3,10 @@
 - 初次验收日期：2026-08-11
 - Code Review 全量修正复验日期：2026-08-13
 - 任务开始时 commit：`b42e446d7626cb28518121d039c3b99d43f9ac80`
-- 本轮复验时用户工作区 HEAD：`826b705e61a0278af739497c4ca5ee1395a59067`
+- 本轮复验基线 HEAD：`826b705e61a0278af739497c4ca5ee1395a59067`
+- 本轮复验对象：基于上述 HEAD 的未提交工作区改动；这些改动随后于 2026-08-15 进入 commit `fb335b85ae7bed79dcea9e79c4e5c147354cd4c6`
 - 实际工作分支：`feat/bilingual-readme`（任务进行期间由用户工作区切换；本任务没有切分支）
-- 状态：通过。本文件中的命令结果以 2026-08-13 本机最终复验的实际输出为准；未使用真实云凭据。
+- 状态：实施方复验通过。本文件中的命令结果以 2026-08-13 本机最终复验的实际输出为准；未使用真实云凭据，本报告不等同于独立第三方认证。
 
 ## 基线
 
@@ -66,7 +67,7 @@
 - `app.asar`：26,683,908 bytes。
 - `app.asar` SHA-256：`17f688a7d60122cf1c5475a4d7d8a1b9aa7cbc336a53097392dc10c64b0f8b15`。
 - `app.asar` 内能检出 `CREATE TABLE _migrations` 与完整 `0001_initial.sql` 执行文本；应用资源目录不存在外部 migration 文件夹。
-- 打包 App 使用全新临时 `userData` 实际启动后生成 `contentdesk.sqlite`：`user_version = 1`，历史为 `0001_initial`，三条 Runtime seed 存在。
+- 打包 App 使用全新临时 `userData` 实际启动后生成 `contentdesk.sqlite`：`user_version = 1`；`_migrations` 记录为 `version = 1`、`name = initial`，对应源文件 `0001_initial.sql`；三条 Runtime seed 存在。
 - E2E 截图已人工查看：Chat、侧栏、Provider/Model 控件、历史与 Composer 可见，无白屏、状态丢失、文字截断或明显布局回归。
 
 ## 外部审查修正
@@ -83,6 +84,7 @@ ChatGPT Pro 最终审查未发现 P0，并指出 Provider Secret/HTTP 边界、R
 
 ## 声明边界
 
+- Migration ADR 修订、实现代码与本报告更新在同一轮工作中完成，并在同一 commit `fb335b8` 中落地；相关 ADR 是实现同期形成的决策记录，不是先于实现存在的独立验收契约。
 - E2E 的 `safeStorage` 使用本机 Electron/macOS 实现；单元测试中的可注入 Crypto 仅验证业务边界。
 - Provider 集成测试只连接本地 HTTP Mock Server。
 - 没有 Azure、Vertex、Bedrock、OpenAI、Anthropic 或其他真实云连通声明。

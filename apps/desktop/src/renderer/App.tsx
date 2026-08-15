@@ -1,11 +1,11 @@
 import { ChatScreen } from "@desktop/renderer/components/chat-screen";
 import { SettingsScreen } from "@desktop/renderer/components/settings-screen";
+import { optimisticMessage } from "@desktop/renderer/optimistic-message";
 import {
   unwrapIpcResult,
   useDesktopAction,
 } from "@desktop/renderer/use-desktop-action";
 import type {
-  ChatMessage,
   Conversation,
   ConversationDetail,
   ProviderView,
@@ -341,19 +341,4 @@ export function App() {
       </main>
     </div>
   );
-}
-
-function optimisticMessage(
-  conversationId: string,
-  content: string
-): ChatMessage {
-  return {
-    content,
-    conversationId,
-    createdAt: new Date().toISOString(),
-    error: null,
-    id: crypto.randomUUID(),
-    role: "user",
-    status: "complete",
-  };
 }

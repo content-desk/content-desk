@@ -1,3 +1,4 @@
+import { optimisticMessage } from "@desktop/renderer/optimistic-message";
 import type {
   ChatMessage,
   ConversationDetail,
@@ -162,19 +163,4 @@ function Message({
       </div>
     </article>
   );
-}
-
-function optimisticMessage(
-  conversationId: string,
-  content: string
-): ChatMessage {
-  return {
-    content,
-    conversationId,
-    createdAt: new Date().toISOString(),
-    error: null,
-    id: crypto.randomUUID(),
-    role: "user",
-    status: "complete",
-  };
 }

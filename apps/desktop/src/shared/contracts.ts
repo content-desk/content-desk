@@ -140,14 +140,6 @@ export const chatEventSchema = z.discriminatedUnion("type", [
 ]);
 export type ChatEvent = z.infer<typeof chatEventSchema>;
 
-export const ipcResultSchema = <T extends z.ZodType>(data: T) =>
-  z.discriminatedUnion("ok", [
-    z.object({ data, ok: z.literal(true) }),
-    z.object({
-      error: z.object({ code: z.string(), message: z.string() }),
-      ok: z.literal(false),
-    }),
-  ]);
 export type IpcResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: { code: string; message: string } };

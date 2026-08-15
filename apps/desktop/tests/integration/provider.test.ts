@@ -37,14 +37,17 @@ describe("OpenAI-compatible provider", () => {
     const repositories = new Repositories(database);
     const memory = new Map<string, ProviderSecrets>();
     const secrets = {
-      delete: async (reference: string | null) => {
+      delete: (reference: string | null) => {
         if (reference) {
           memory.delete(reference);
         }
+        return Promise.resolve();
       },
-      read: async (reference: string) => requireSecret(memory, reference),
-      write: async (reference: string, value: ProviderSecrets) => {
+      read: (reference: string) =>
+        Promise.resolve(requireSecret(memory, reference)),
+      write: (reference: string, value: ProviderSecrets) => {
         memory.set(reference, value);
+        return Promise.resolve();
       },
     };
     const service = new ProviderService(repositories, secrets);
@@ -164,10 +167,11 @@ describe("Provider support boundary", () => {
     const repositories = new Repositories(database);
     const memory = new Map<string, ProviderSecrets>();
     const service = new ProviderService(repositories, {
-      delete: async () => undefined,
-      read: async (reference) => requireSecret(memory, reference),
-      write: async (reference, value) => {
+      delete: () => Promise.resolve(),
+      read: (reference) => Promise.resolve(requireSecret(memory, reference)),
+      write: (reference, value) => {
         memory.set(reference, value);
+        return Promise.resolve();
       },
     });
 
@@ -217,14 +221,16 @@ async function createFixture(listener: RequestListener, timeoutMs = 1000) {
   const service = new ProviderService(
     repositories,
     {
-      delete: async (reference) => {
+      delete: (reference) => {
         if (reference) {
           memory.delete(reference);
         }
+        return Promise.resolve();
       },
-      read: async (reference) => requireSecret(memory, reference),
-      write: async (reference, value) => {
+      read: (reference) => Promise.resolve(requireSecret(memory, reference)),
+      write: (reference, value) => {
         memory.set(reference, value);
+        return Promise.resolve();
       },
     },
     timeoutMs

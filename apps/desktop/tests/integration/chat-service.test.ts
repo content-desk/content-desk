@@ -1,4 +1,5 @@
 import { EventEmitter } from "node:events";
+import { Readable } from "node:stream";
 import { ChatService } from "@desktop/main/chat-service";
 import { openDatabase } from "@desktop/main/database/database";
 import { Repositories } from "@desktop/main/database/repositories";
@@ -93,15 +94,9 @@ describe("ChatService", () => {
         },
       }) as unknown as WebContents;
       const service = new ChatService(repositories, {
-        stream: async (
-          _id: string,
-          _model: string,
-          messages: ModelMessage[]
-        ) => {
+        stream: (_id: string, _model: string, messages: ModelMessage[]) => {
           captured.push(messages);
-          return (async function* () {
-            yield "complete";
-          })();
+          return Promise.resolve(Readable.from(["complete"]));
         },
       });
       service.start(

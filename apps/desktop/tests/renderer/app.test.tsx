@@ -34,7 +34,7 @@ afterEach(() => {
 describe("Desktop renderer", () => {
   it("settles a run when delta and done arrive before chat.start resolves", async () => {
     const state = createDesktopMock();
-    state.api.chat.start = vi.fn(async (input) => {
+    state.api.chat.start = vi.fn((input) => {
       const userMessage = message(input.conversationId, "user", input.content);
       const assistant = message(
         input.conversationId,
@@ -47,7 +47,7 @@ describe("Desktop renderer", () => {
       });
       state.emit({ runId: input.runId, text: "fast ", type: "delta" });
       state.emit({ message: assistant, runId: input.runId, type: "done" });
-      return ok({ accepted: true as const });
+      return Promise.resolve(ok({ accepted: true as const }));
     });
     installDesktopApi(state.api);
     const user = userEvent.setup();
@@ -75,7 +75,7 @@ describe("Desktop renderer", () => {
       }
     );
     let runId = "";
-    state.api.chat.start = vi.fn(async (input) => {
+    state.api.chat.start = vi.fn((input) => {
       ({ runId } = input);
       return startResult;
     });
@@ -91,7 +91,7 @@ describe("Desktop renderer", () => {
     await waitFor(() => expect(runId).not.toBe(""));
     await user.click(screen.getByRole("button", { name: "Conversation B" }));
 
-    await act(async () => {
+    act(() => {
       state.emit({ runId, text: "only for A", type: "delta" });
     });
     expect(
@@ -104,7 +104,7 @@ describe("Desktop renderer", () => {
       ...requiredDetail(state.details, conversationAId),
       messages: [assistant],
     });
-    await act(async () => {
+    act(() => {
       state.emit({ message: assistant, runId, type: "done" });
       acceptStart(ok({ accepted: true }));
     });

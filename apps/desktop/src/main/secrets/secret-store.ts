@@ -36,7 +36,7 @@ export class ElectronSecretCrypto implements SecretCrypto {
     return backend !== "basic_text" && backend !== "unknown";
   }
 
-  public async encrypt(value: string): Promise<Buffer> {
+  public encrypt(value: string): Promise<Buffer> {
     return this.crypto.encryptStringAsync(value);
   }
 
