@@ -1,0 +1,291 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
+  color: #20231f;
+  background: #f5f4ef;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  min-width: 900px;
+  min-height: 100vh;
+  margin: 0;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+.shell {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  min-height: 100vh;
+}
+aside {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 28px 16px 18px;
+  color: #eaf0ea;
+  background: #1f2823;
+}
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 18px;
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-weight: 800;
+  color: #1d291c;
+  background: #d7f26b;
+  border-radius: 9px;
+}
+nav,
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.history-row button:last-child {
+  padding-inline: 10px;
+}
+aside button {
+  padding: 10px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #bcc7bf;
+  text-align: left;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+}
+aside button.active,
+aside button.selected,
+aside button:hover {
+  color: white;
+  background: #354239;
+}
+aside .primary {
+  font-weight: 650;
+  color: #1d291c;
+  text-align: center;
+  background: #d7f26b;
+}
+.history {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+aside small {
+  padding: 0 8px;
+  color: #839187;
+}
+main {
+  min-width: 0;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 34px;
+  border-bottom: 1px solid #deddd7;
+}
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+header h1 {
+  margin-bottom: 4px;
+  font-size: 22px;
+}
+header p {
+  margin-bottom: 0;
+  color: #73786f;
+}
+.chat-screen {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100vh;
+}
+.controls {
+  display: flex;
+  gap: 8px;
+}
+input,
+textarea,
+select {
+  padding: 10px 12px;
+  color: inherit;
+  background: white;
+  border: 1px solid #d2d2cb;
+  border-radius: 9px;
+}
+.messages {
+  padding: 34px max(36px, calc((100% - 760px) / 2));
+  overflow-y: auto;
+}
+.empty {
+  margin-top: 15vh;
+  color: #62685f;
+  text-align: center;
+}
+.message {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 13px;
+  margin-bottom: 26px;
+  line-height: 1.65;
+}
+.message.user {
+  padding: 16px;
+  background: #eeeee8;
+  border-radius: 12px;
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  font-weight: 700;
+  color: #263023;
+  background: #d7f26b;
+  border-radius: 9px;
+}
+.message.user .avatar {
+  background: #dde3dd;
+}
+.message pre {
+  padding: 14px;
+  overflow-x: auto;
+  color: #edf2ec;
+  background: #242924;
+  border-radius: 8px;
+}
+.composer {
+  padding: 18px max(36px, calc((100% - 760px) / 2)) 24px;
+  border-top: 1px solid #deddd7;
+}
+.composer textarea {
+  width: 100%;
+  resize: vertical;
+}
+.composer > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #777d73;
+}
+.composer-actions,
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+button.primary,
+.composer button {
+  padding: 9px 18px;
+  color: white;
+  background: #2a372e;
+  border: 0;
+  border-radius: 8px;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.error {
+  color: #b4382f;
+}
+.success {
+  margin: 0;
+  color: #3f6a26;
+}
+.settings {
+  min-height: 100vh;
+}
+.settings-error {
+  margin: 16px 34px 0;
+}
+.tabs {
+  display: flex;
+  gap: 8px;
+  padding: 18px 34px 0;
+}
+.tabs button {
+  padding: 8px 12px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+}
+.tabs button.active {
+  font-weight: 650;
+  border-color: #51652f;
+}
+.settings-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(400px, 1.2fr);
+  gap: 24px;
+  padding: 26px 34px;
+}
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card,
+.panel {
+  padding: 16px;
+  text-align: left;
+  background: white;
+  border: 1px solid #deddd7;
+  border-radius: 12px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: inherit;
+}
+.card span,
+.card small {
+  color: #73786f;
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.runtime-list {
+  max-width: 760px;
+  padding: 28px 34px;
+}
+.runtime-list .card div {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}

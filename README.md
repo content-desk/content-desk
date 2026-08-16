@@ -1,129 +1,160 @@
-# content-desk
+# ContentDesk
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Hono, ORPC, and more.
+**简体中文** | [English](README.en.md)
 
-## Features
+ContentDesk 是面向个人创作者、一人公司和小型内容团队的本地优先 AI 创作工作台。
 
-- **TypeScript** - For type safety and improved developer experience
-- **TanStack Router** - File-based routing with full type safety
-- **React Native** - Build mobile apps using React
-- **Expo** - Tools for React Native development
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Hono** - Lightweight, performant server framework
-- **oRPC** - End-to-end type-safe APIs with OpenAPI integration
-- **Node.js** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **PWA** - Progressive Web App support
-- **Turborepo** - Optimized monorepo build system
+> **当前状态：Desktop v0.1 已可运行，但尚不能用于生产环境。** Electron Desktop 已贯通本地对话、Provider 配置、SQLite 持久化和 Agent Runtime 只读探测；Project 与 Workspace Files 内容工作流仍未实现。
 
-## Getting Started
+## 当前能力
 
-First, install the dependencies:
+| 状态 | 能力 | 说明 |
+| --- | --- | --- |
+| 可运行 | Electron Desktop v0.1 | Native Chat、对话持久化、Provider 设置、Runtime discovery 与固定 `--version` 探测 |
+| 可运行 | OpenAI Compatible | 文本流式对话、停止、重试和连接测试 |
+| 可运行 | Anthropic Compatible | 文本流式对话、停止、重试和连接测试 |
+| Schema only | Azure OpenAI、Vertex AI、Amazon Bedrock | 可保存非敏感配置，但不能进入 Chat，不提供伪实现或 fallback |
+| 可运行的基础能力 | Web 与 Server | Hono、oRPC、OpenAPI、Better Auth 与 PostgreSQL 认证数据面 |
+| 原型/模板 | Native、Extension、Fumadocs | 尚未进入 ContentDesk 的可用内容工作流 |
+| 计划 | Project 内容事实中心 | Project、Source、Document、Storyboard、Asset、Publication、Metric、Insight 尚未实现 |
+
+自动化 Provider 测试连接本地 Mock Server，不代表 OpenAI、Anthropic、Azure、Vertex、Bedrock 或其他真实云服务已连通。
+
+## 产品方向
+
+- **本地优先**：Desktop 内容数据和配置优先留在用户设备。
+- **Project 是事实中心**：长期由 Project 及其文件承载内容上下文，Chat 只是入口之一。
+- **AI 可替换**：Provider 与 Runtime 都有明确边界；基础内容管理不应依赖单一 AI 服务。
+- **逐层形成闭环**：先保证一个小范围端到端可用，再扩展内容模型与制作能力。
+
+目标生命周期是：
+
+```text
+Signal → Source → Document → Storyboard → Shot → Asset
+                                           ↓
+                       Publication → Metric → Insight
+```
+
+这仍是产品方向，不是当前功能声明。Desktop v0.1 当前只实现本地 Chat 基础。
+
+## 架构与数据边界
+
+Desktop 与 Server 使用彼此独立的数据面：
+
+```text
+Electron Renderer
+      │ typed IPC
+Electron Preload
+      │
+Electron Main ── node:sqlite ── Desktop SQLite
+      │
+      ├── safeStorage ── encrypted Provider secrets
+      └── AI SDK ── configured third-party Provider
+
+Web / Native ── HTTP / oRPC / Better Auth ── Hono Server ── PostgreSQL
+```
+
+- Desktop SQLite 保存 Conversation、Message、Provider 非敏感配置和 Runtime Profile。
+- API Key 与 Custom Header 值由 Electron `safeStorage` 加密，数据库只保存引用和非敏感元数据。
+- Desktop 目前没有 Project、Workspace Files、云同步、导出或备份机制。
+- Provider 请求由 Main 发出；Renderer 没有 Node、SQLite、Secret 或网络 Provider 权限。
+- Server PostgreSQL 当前保存 Better Auth 认证数据，不与 Desktop SQLite 共用 schema。
+- 远程 Provider Base URL 必须使用 HTTPS；HTTP 只允许 loopback。
+
+因此，“本地优先”不等于“所有数据永不离开设备”：发送 Chat 时，用户输入和必要上下文会发送给用户配置的第三方 Provider。
+
+## 仓库结构
+
+```text
+apps/
+├── desktop/      Electron Main、Preload、Renderer、SQLite 与测试
+├── web/          React + TanStack Router Web/PWA 基础工程
+├── server/       Hono、oRPC/OpenAPI 与 Better Auth
+├── native/       Expo / React Native 原型
+├── extension/    WXT 浏览器扩展占位工程
+└── fumadocs/     Fumadocs 模板文档站
+packages/
+├── api/          共享 oRPC context、procedure 和 router
+├── auth/         Better Auth 配置
+├── db/           Drizzle/PostgreSQL 认证数据面
+├── env/          环境变量校验
+├── ui/           共享 React UI 与样式
+└── config/       共享 TypeScript 配置
+```
+
+根目录使用 pnpm workspace 与 Turborepo 编排任务。Desktop SQLite 与 Server PostgreSQL 的边界记录在 [ADR-0001](docs/adr/0001-desktop-bootstrap-v0.1.md)。
+
+## 快速开始
+
+### 环境要求
+
+- Node.js 24；Electron 43 内置 Node 24.17 并使用 `node:sqlite`。
+- pnpm `11.21.0`，由根 `package.json` 固定。
+- macOS 是 Desktop v0.1 已验收的平台。
+
+### 启动 Desktop
 
 ```bash
 pnpm install
+pnpm run dev:desktop
 ```
 
-## Database Setup
+Desktop 不依赖 Server 或 PostgreSQL即可启动。首次启动会在 Electron `userData` 中创建 SQLite 数据库；Provider Secret 也只写入该应用目录下的加密存储。
 
-This project uses PostgreSQL with Drizzle ORM.
+如需使用 Chat，在设置页配置 OpenAI Compatible 或 Anthropic Compatible Provider。不要提交 API Key、`.env`、SQLite 或运行状态文件。
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+### 可选：启动 Web 与 Server
 
-3. Apply the schema to your database:
+Web/Server 认证链路需要 PostgreSQL 与本地环境变量。准备 `apps/server/.env` 和 `apps/web/.env` 后执行：
 
 ```bash
+pnpm run db:start
 pnpm run db:push
+pnpm run dev:server
+pnpm run dev:web
 ```
 
-Then, run the development server:
+Web 默认是 `http://localhost:3001`，Server 默认是 `http://localhost:3000`。
 
-```bash
-pnpm run dev
-```
+## AI Provider 与 Runtime
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-Use the Expo Go app to run the mobile application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+| 类型 | v0.1 状态 | Secret | 可进入 Native Chat |
+| --- | --- | --- | --- |
+| OpenAI Compatible | 已实现 | `safeStorage` | 是 |
+| Anthropic Compatible | 已实现 | `safeStorage` | 是 |
+| Azure OpenAI | Schema only | 可保存 | 否 |
+| Vertex AI | Schema only | 可保存 | 否 |
+| Amazon Bedrock | Schema only | 可保存 | 否 |
 
-## UI Customization
+ContentDesk Native 是当前唯一 Chat Runtime。Codex 与 Claude Code Profile 只做可执行文件 discovery、手工选择与固定 `--version` 探测；不会接管登录、读取全局认证配置或执行任意命令。
 
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
+## 开发与验收命令
 
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
+从仓库根目录运行：
 
-### Add more shared components
+| 命令 | 作用 |
+| --- | --- |
+| `pnpm run dev:desktop` | 启动 Electron Desktop 开发模式 |
+| `pnpm --filter @content-desk/desktop check` | 检查 Desktop 源码与测试 |
+| `pnpm --filter @content-desk/desktop check-types` | Desktop TypeScript 检查 |
+| `pnpm --filter @content-desk/desktop test` | Desktop 单元、集成和 Renderer 测试 |
+| `pnpm --filter @content-desk/desktop test:e2e` | 构建并运行 Electron E2E；使用本地 Mock Provider |
+| `pnpm --filter @content-desk/desktop package` | 生成 unsigned macOS directory artifact |
+| `pnpm run check` | 全仓 Ultracite/Biome 检查 |
+| `pnpm run check-types` | Turborepo workspace 类型检查 |
+| `pnpm turbo run test --force` | 运行定义了 `test` 的 workspace |
+| `pnpm run build` | 构建所有定义了 `build` 的 workspace |
 
-Run this from the project root to add more primitives to the shared UI package:
+Desktop 的本地验收步骤、旧数据库策略与已知限制见 [Desktop README](apps/desktop/README.md) 和 [验收报告](docs/engineering/desktop-bootstrap-v0.1-acceptance.md)。
 
-```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
-```
+## 路线图
 
-Import shared components like this:
-
-```tsx
-import { Button } from "@content-desk/ui/components/button";
-```
-
-### Add app-specific blocks
-
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
-
-## Deployment
-
-### Docker Compose
-
-- Target: web + server
-- Config: `docker-compose.yml` (app Dockerfiles live in `apps/*/Dockerfile`)
-- Build images: pnpm run docker:build
-- Start: pnpm run docker:up
-- Logs: pnpm run docker:logs
-- Stop: pnpm run docker:down
-
-Environment variables are read from each app's `.env` file (baked into web builds for public variables) and overridden in `docker-compose.yml` for container networking.
-
-For more details, see the guide on [Deploying with Docker Compose](https://www.better-t-stack.dev/docs/guides/docker).
+1. 以 Project 为事实中心建立本地项目模型与用户可控的 Workspace Files。
+2. 打通无需 AI 的 `Project → Document/Script → Storyboard → Asset` 基础闭环。
+3. 将 Desktop Chat 变成操作 Project 的入口，而不是孤立对话产品。
+4. 把 Extension 与 Native 从模板升级为素材收集与确认入口。
+5. 在内容模型稳定后扩展生成、发布、复用与数据复盘。
 
 ## License
 
-ContentDesk is source-available and self-hostable under the [ContentDesk License](./LICENSE). The ContentDesk License is a custom license consisting of additional conditions and the complete Apache License 2.0 text; the project is not licensed under standard Apache-2.0 and is not OSI-approved open source.
-
-## Project Structure
-
-```
-content-desk/
-├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
-│   ├── native/      # Mobile application (React Native, Expo)
-│   └── server/      # Backend API (Hono, ORPC)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-│   ├── api/         # API layer / business logic
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
-```
-
-## Available Scripts
-
-- `pnpm run dev`: Start all applications in development mode
-- `pnpm run build`: Build all applications
-- `pnpm run dev:web`: Start only the web application
-- `pnpm run dev:server`: Start only the server
-- `pnpm run check-types`: Check TypeScript types across all apps
-- `pnpm run dev:native`: Start the React Native/Expo development server
-- `pnpm run db:push`: Push schema changes to database
-- `pnpm run db:generate`: Generate database client/types
-- `pnpm run db:migrate`: Run database migrations
-- `pnpm run db:studio`: Open database studio UI
-- `cd apps/web && pnpm run generate-pwa-assets`: Generate PWA assets
-- `pnpm run docker:build`: Build the Docker Compose images
-- `pnpm run docker:up`: Build and start the Docker Compose stack
-- `pnpm run docker:logs`: Tail logs from the Docker Compose stack
-- `pnpm run docker:down`: Stop the Docker Compose stack
+ContentDesk 采用仓库中的 [ContentDesk License](LICENSE)，并附有 [NOTICE](NOTICE)。这是包含额外条件及完整 Apache License 2.0 文本的自定义 source-available 许可证，不是标准 Apache-2.0，也不是 OSI 批准的开源许可证。使用、修改或分发前请阅读完整条款。
